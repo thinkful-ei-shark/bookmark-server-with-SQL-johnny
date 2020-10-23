@@ -6,6 +6,10 @@ const helmet = require('helmet');
 const winston = require('winston');
 const { NODE_ENV } = require('./config');
 
+// routes
+const listRouter = require('./routes/bookmarkRoutes');
+const bookmarkRouter = require('./routes/bookmarkRoutes');
+
 // describe app to use express
 const app = express();
 
@@ -17,7 +21,7 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: [
-    new winston.transport.File({ filename: 'info.log ' })
+    new winston.transports.File({ filename: 'info.log ' })
   ]
 });
 
@@ -49,6 +53,8 @@ app.use(function validateBearerToken(req, res, next) {
 app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
+
+app.use('/bookmarks', bookmarkRouter);
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
