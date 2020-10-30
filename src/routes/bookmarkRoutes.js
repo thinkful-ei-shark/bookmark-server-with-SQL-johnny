@@ -3,6 +3,7 @@ const logger = require('../logger');
 const bodyParser = express.json();
 const { uuid } = require('uuidv4');
 const validUrl = require('valid-url');
+const bookmarkService = require('../../services/bookmarkServices');
 
 const bookmarkRouter = express.Router();
 
@@ -10,8 +11,12 @@ const { bookmarks } = require('../store');
 
 bookmarkRouter
   .route('/')
-  .get((req, res) => {
-    res.json(bookmarks);
+  .get((req, res, next) => {
+    bookmarkService.getBookmarks(req.app.get('db'))
+      .then(bookmarks => {
+        res.json(bookmarks);
+      })
+      .catch(next);
   })
   .post(bodyParser, (req, res)=>{
     const { title, url, description, rating } = req.body;
@@ -38,13 +43,15 @@ bookmarkRouter
 bookmarkRouter
   .route('/:id')
   .get((req, res) => {
-    const foundBookmark = bookmarks.find(bookmark => bookmark.id === req.params.id);
-    if(!foundBookmark) {
-      logger.error('Not Found');
-      res
-        .status(404);
-    }
-    res.json(foundBookmark);
+    bookmarkService.getBookmarkById(req.app.get('db'), req.params.id)
+      .then(bookmark => {
+        if(!bookmark) {
+          return res.status(400).json({
+            error: {message: 'Bookmark doesn\'t exist'}
+          });
+        }
+        res.json(bookmark);
+      });
   })
   .delete((req, res) => {
     const bookmarkID  = req.params.id;
