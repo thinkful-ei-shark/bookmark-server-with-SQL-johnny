@@ -52,12 +52,27 @@ describe.only('Bookmark Endpoints', function() {
         .expect(200, []);
     });
 
-    it('responds with 404', () => {
-      const itemId = 123456;
+    it('responds with 404 when GET /bookmarks/id', () => {
       return supertest(app)
-        .get(`/articles/${itemId}`)
+        .get('/bookmarks/123')
         .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
-        .expect(404);
+        .expect(400);
+    });
+  });
+
+  describe('POST /bookmarks', () => {
+    it('responds with 400 missing \'title\' if not supplied', () => {
+      const newBookmarkMissingTitle = {
+        id: 4,
+        // title: 'test-title'
+        url: 'https://test.com',
+        rating: 1
+      };
+      return supertest(app)
+        .post('/bookmarks')
+        .send(newBookmarkMissingTitle)
+        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+        .expect(400);
     });
   });
 
