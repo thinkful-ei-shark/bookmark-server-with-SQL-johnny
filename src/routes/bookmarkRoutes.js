@@ -65,20 +65,27 @@ bookmarkRouter
 
 bookmarkRouter
   .route('/:id')
-  .get((req, res) => {
-    bookmarkService.getBookmarkById(req.app.get('db'), req.params.id)
+  .all((req, res, next) => {
+    const bookmarkID = req.params.id;
+    bookmarkService.getBookmarkById(req.app.get('db'), bookmarkID)
       .then(bookmark => {
         if(!bookmark) {
-          return res.status(400).json({
-            error: {message: 'Bookmark doesn\'t exist'}
+          logger.error(`Bookmark doesn't exist with ${bookmarkID}`);
+          return res.status(404).json({
+            error: { message : 'Bookmark not found'}
           });
         }
-        res.json(bookmark);
-      });
+        res.bookmark = bookmark;
+        next();
+      })
+      .catch(next);
+  })
+  .get((req, res) => {
+    res.json(serializeBookmark(res.bookmark));
   })
   .delete((req, res, next) => {
     const bookmarkID  = req.params.id;
-    
+
     bookmarkService.deleteBookmark(req.app.get('db'), bookmarkID)
       .then(rows => {
         logger.info(`Bookmark containing id ${bookmarkID} has been deleted`);

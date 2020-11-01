@@ -34,7 +34,7 @@ describe.only('Bookmark Endpoints', function() {
         .expect(200, testItems);
     });
 
-    it('GET /articles/:article_id responds with 200 and the specificied article', () => {
+    it('GET /bookmarks/:id responds with 200 and the specificied bookmark', () => {
       const itemId = 2;
       const expectedItem = testItems[itemId - 1];
       return supertest(app)
@@ -56,7 +56,7 @@ describe.only('Bookmark Endpoints', function() {
       return supertest(app)
         .get('/bookmarks/123')
         .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
-        .expect(400);
+        .expect(404);
     });
   });
 
@@ -73,6 +73,15 @@ describe.only('Bookmark Endpoints', function() {
         .send(newBookmarkMissingTitle)
         .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
         .expect(400);
+    });
+  });
+
+  describe('DELETE /bookmarks/:id', () => {
+    it('responds with 404', () => {
+      return supertest(app)
+        .delete('/bookmarks/123')
+        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+        .expect(404);
     });
   });
 
